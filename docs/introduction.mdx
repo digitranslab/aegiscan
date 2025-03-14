@@ -1,0 +1,97 @@
+---
+title: Introduction
+description: A quick overview of Aegiscan.
+sidebarTitle: What is Aegiscan?
+icon: shield-cat
+---
+
+[Aegiscan](https://aegiscan.com) is the open workflow automation platform for security and IT engineers.
+It's an open source Tines / Splunk SOAR alternative with response-as-code.
+Aegiscan is built on a simple YAML-based DSL for integrations, no-code UI for workflows, and [Temporal](https://temporal.io/) for scale and reliability.
+
+## Why Aegiscan?
+
+We're on a mission to make security and IT automation more accessible through **response-as-code**.
+What Sigma rules did for detection, YARA for malware research, and Nuclei did for vulnerabilities, Aegiscan is doing for response automation.
+
+## Get Started
+
+<Tip>
+  We highly recommend every user complete the [quickstart tutorial](/quickstart/tutorial).
+  This tutorial covers all the core features of Aegiscan, which will save you hours of learning time.
+</Tip>
+
+<CardGroup cols={3}>
+  <Card title="Install" icon="download" href="/quickstart/install">
+    Self-host Aegiscan on your own infrastructure.
+  </Card>
+  <Card title="Users" icon="user" href="/quickstart/admin">
+    Log into Aegiscan and invite your team.
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/quickstart/tutorial">
+    Get from zero to hero in one tutorial.
+  </Card>
+  <Card title="Core Actions" icon="cube" href="/quickstart/core-actions">
+    HTTP request, data transforms, and workflow actions.
+  </Card>
+  <Card title="Expressions" icon="dollar-sign" href="/quickstart/expressions">
+    Reference and transform data from actions, webhooks, and more.
+  </Card>
+  <Card title="Secrets" icon="key" href="/quickstart/secrets">
+    Store and retrieve secrets in workflows.
+  </Card>
+</CardGroup>
+
+## Tutorials
+
+<Note>
+  You can sync custom YAML integrations and Python scripts directly into Aegiscan from a private Git repo.
+  Learn more in the [custom integrations](/tutorials/custom-integrations) tutorial.
+
+  This is the recommended way to use Aegiscan.
+  All reusable integrations should be stored and version controlled in your own GitHub / GitLab repository.
+</Note>
+
+<CardGroup cols={3}>
+  <Card title="Trigger workflows" icon="bolt" href="/tutorials/workflow-triggers">
+    Trigger a workflow via the UI, webhook, or schedule.
+  </Card>
+  <Card title="Child workflows" icon="diagram-project" href="/tutorials/child-workflows">
+    Build and execute workflows of workflows.
+  </Card>
+  <Card title="Explode-implode" icon="layer-group" href="/tutorials/explode-implode">
+    Loop and process lists of data with child workflows.
+  </Card>
+  <Card title="Data transforms" icon="brackets-curly" href="/tutorials/data-transforms">
+    Manipulate, filter, and deduplicate data with transform actions.
+  </Card>
+  <Card title="Custom integrations" icon="github" href="/tutorials/custom-integrations">
+    Build and sync custom integrations via git.
+  </Card>
+  <Card title="Alert on failure" icon="triangle-exclamation" href="/tutorials/alert-on-failure">
+    Notify your team when a workflow fails.
+  </Card>
+</CardGroup>
+
+## Integrations
+
+<CardGroup cols={3}>
+  <Card title="Detect" icon="magnifying-glass" href="/templates/detect">
+    Ingest and analyze alerts and incidents.
+  </Card>
+  <Card title="Notify" icon="bell" href="/templates/notify">
+    Add tickets, interact with users, and track cases.
+  </Card>
+  <Card title="Isolate" icon="shield" href="/templates/isolate">
+    Isolate, networks, devices, and users.
+  </Card>
+  <Card title="Evict" icon="ban" href="/templates/evict">
+    Remove unhealthy or malicious actors.
+  </Card>
+  <Card title="Model" icon="list-check" href="/templates/model">
+    Build asset, IoC, and vulnerability inventories.
+  </Card>
+  <Card title="Harden" icon="lock" href="/templates/harden">
+    Update assets, configs, and policies.
+  </Card>
+</CardGroup>

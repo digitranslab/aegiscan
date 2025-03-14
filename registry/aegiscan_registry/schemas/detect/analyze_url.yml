@@ -1,0 +1,3 @@
+url:
+  type: str
+  description: URL to analyze or scan.

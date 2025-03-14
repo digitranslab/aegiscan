@@ -1,0 +1,117 @@
+from fastapi import APIRouter, HTTPException, status
+from sqlmodel import select
+
+from aegiscan.auth.dependencies import WorkspaceUserRole
+from aegiscan.db.dependencies import AsyncDBSession
+from aegiscan.db.schemas import Schedule
+from aegiscan.identifiers import ScheduleID
+from aegiscan.identifiers.workflow import OptionalAnyWorkflowIDQuery
+from aegiscan.logger import logger
+from aegiscan.types.exceptions import AegiscanNotFoundError, AegiscanServiceError
+from aegiscan.workflow.schedules.models import (
+    ScheduleCreate,
+    ScheduleSearch,
+    ScheduleUpdate,
+)
+from aegiscan.workflow.schedules.service import WorkflowSchedulesService
+
+router = APIRouter(prefix="/schedules")
+
+
+@router.get("", tags=["schedules"])
+async def list_schedules(
+    role: WorkspaceUserRole,
+    session: AsyncDBSession,
+    workflow_id: OptionalAnyWorkflowIDQuery,
+) -> list[Schedule]:
+    service = WorkflowSchedulesService(session, role=role)
+    return await service.list_schedules(workflow_id=workflow_id)
+
+
+@router.post("", tags=["schedules"])
+async def create_schedule(
+    role: WorkspaceUserRole,
+    session: AsyncDBSession,
+    params: ScheduleCreate,
+) -> Schedule:
+    """Create a schedule for a workflow."""
+    service = WorkflowSchedulesService(session, role=role)
+    try:
+        return await service.create_schedule(params)
+    except AegiscanServiceError as e:
+        logger.error("Error creating schedule", error=e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error creating schedule: {e}. Please try again or contact support.",
+        ) from e
+
+
+@router.get("/{schedule_id}", tags=["schedules"])
+async def get_schedule(
+    role: WorkspaceUserRole, session: AsyncDBSession, schedule_id: ScheduleID
+) -> Schedule:
+    """Get a schedule from a workflow."""
+    service = WorkflowSchedulesService(session, role=role)
+    try:
+        return await service.get_schedule(schedule_id)
+    except AegiscanNotFoundError as e:
+        logger.error("Error getting schedule", error=e)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Schedule {schedule_id} not found. Please check whether this schedule exists and try again.",
+        ) from e
+
+
+@router.post("/{schedule_id}", tags=["schedules"])
+async def update_schedule(
+    role: WorkspaceUserRole,
+    session: AsyncDBSession,
+    schedule_id: ScheduleID,
+    params: ScheduleUpdate,
+) -> Schedule:
+    """Update a schedule from a workflow. You cannot update the Workflow Definition, but you can update other fields."""
+    service = WorkflowSchedulesService(session, role=role)
+    try:
+        return await service.update_schedule(schedule_id, params)
+    except AegiscanNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Schedule {schedule_id} not found. Please check whether this schedule exists and try again.",
+        ) from e
+    except AegiscanServiceError as e:
+        logger.error("Error updating schedule", error=e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update schedule: {e}. Please try again or contact support.",
+        ) from e
+
+
+@router.delete(
+    "/{schedule_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["schedules"],
+)
+async def delete_schedule(
+    role: WorkspaceUserRole, session: AsyncDBSession, schedule_id: ScheduleID
+) -> None:
+    """Delete a schedule from a workflow."""
+    service = WorkflowSchedulesService(session, role=role)
+    try:
+        await service.delete_schedule(schedule_id)
+    except AegiscanServiceError as e:
+        logger.error("Error deleting schedule", error=e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete schedule: {e}. Please try again or contact support.",
+        ) from e
+
+
+@router.get("/search", tags=["schedules"])
+async def search_schedules(
+    role: WorkspaceUserRole, session: AsyncDBSession, params: ScheduleSearch
+) -> list[Schedule]:
+    """**[WORK IN PROGRESS]** Search for schedules."""
+    statement = select(Schedule).where(Schedule.owner_id == role.workspace_id)
+    results = await session.exec(statement)
+    schedules = results.all()
+    return list(schedules)

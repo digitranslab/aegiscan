@@ -1,0 +1,126 @@
+[build-system]
+requires = ["hatchling >= 1.13.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "aegiscan"
+description = "Open source Tines / Splunk SOAR alternative for security and IT engineers."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "AGPL-3.0"
+authors = [{ name = "Aegiscan", email = "founders@digi-trans.org" }]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "Topic :: Security",
+    "Topic :: System :: Systems Administration",
+]
+dependencies = [
+    "alembic_utils==0.8.4",
+    "alembic-postgresql-enum==1.3.0",
+    "alembic==1.13.2",
+    "asyncpg==0.29.0",
+    "async-lru==2.0.4",
+    "cloudpickle==3.0.0",
+    "colorlog==6.8.2",
+    "cryptography==44.0.1",
+    "dateparser>=1.2.1,<1.3.0",
+    "email-validator>=2.0.0",
+    "fastapi-users[sqlalchemy,oauth]==13.0.0",
+    "fastapi==0.111.0",
+    "greenlet==3.0.3",
+    "httpx==0.27.2",
+    "jsonpath_ng>=1.7.0,<1.8.0",
+    "lark==1.1.9",
+    "loguru==0.7.2",
+    "msal==1.31.1",
+    "ollama==0.4.7",
+    "google-auth==2.37.0",
+    "openai==1.65.2",
+    "orjson==3.10.3",
+    "paramiko==3.5.0",
+    "psycopg[binary]==3.1.19",
+    "pyarrow==16.1.0",
+    "pydantic==2.10.6",
+    "pydantic-extra-types==2.10.2",
+    "phonenumbers==8.13.55",
+    "pysaml2==7.5.0",
+    "python-slugify==8.0.4",
+    "ray[default]==2.40.0",
+    "sqlmodel==0.0.18",
+    "temporalio==1.9.0",
+    "tenacity==8.3.0",
+    "tomli==2.2.1",
+    "uv==0.4.10",
+    "uvicorn==0.29.0",
+    "virtualenv==20.27.0",
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://aegiscan.com"
+Documentation = "https://docs.aegiscan.com/"
+Repository = "https://github.com/DigitransLab/aegiscan"
+
+[project.optional-dependencies]
+dev = [
+    "minio",
+    "mypy",
+    "pre-commit",
+    "pytest-mock",
+    "pytest==8.3.2",
+    "python-dotenv",
+    "psycopg>=3.1.19",
+    "respx",
+    "ruff==0.9.1",
+]
+
+[tool.hatch.version]
+path = "aegiscan/__init__.py"
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 88
+fix = true
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501", # line too long, handled by ruff
+    "B008", # do not perform function calls in argument defaults
+    "W191", # indentation contains tabs
+]
+
+[tool.ruff.lint.pyupgrade]
+# Preserve types, even if a file imports `from __future__ import annotations`.
+keep-runtime-typing = true
+
+[tool.pytest.ini_options]
+addopts = ["--strict-config", "--strict-markers", "-vvrP"]
+xfail_strict = true
+log_level = "ERROR"
+log_cli = true
+log_cli_level = "ERROR"
+markers = [
+    "webtest: marks tests that require the web",
+    "slow: marks tests as slow",
+    "dbtest: marks tests that make database calls",
+    "disable_fixture: marks tests that disable fixtures",
+    "integration: marks tests that require a live Aegiscan stack and env vars.",
+]

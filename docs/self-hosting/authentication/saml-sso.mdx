@@ -1,0 +1,45 @@
+---
+title: SAML SSO
+description: Learn how to authenticate into Aegiscan with SAML SSO.
+icon: user-lock
+---
+
+## Supported Identity Providers
+
+- Okta
+- Microsoft Entra ID
+
+## Configuration
+
+In your `.env` file, make sure you have the following value set.
+
+```bash
+AEGISCAN__AUTH_TYPES=saml
+AEGISCAN__SETTING_OVERRIDE_SAML_ENABLED=true
+```
+
+## Instructions
+
+<Steps>
+    <Step title="Create an SAML app">
+        Go to **Applications** and select **Add Application**.
+        Select **SAML 2.0** and click on **Create**.
+    </Step>
+    <Step title="Configure ACS endpoint">
+        Set the **Single sign-on URL** to `https://<your-aegiscan-instance>/auth/saml/acs`.
+    </Step>
+    <Step title="Configure Audience Restriction">
+        Set the **Audience Restriction** to `https://<your-aegiscan-instance>`.
+    </Step>
+    <Step title="Configure SAML settings in environment variables">
+        Set the following environment variables in your `.env` file:
+        - `SAML_IDP_METADATA_URL`: Okta metadata URL
+    </Step>
+    <Step title="Restart Aegiscan instance">
+        Restart Aegiscan to apply the changes.
+    </Step>
+    <Step title="Test SSO configuration">
+        Navigate to your Aegiscan instance and click on the **Login** button.
+        You should be redirected to Okta for authentication.
+    </Step>
+</Steps>

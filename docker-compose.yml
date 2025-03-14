@@ -1,0 +1,234 @@
+services:
+  caddy:
+    image: caddy:2.8.4-alpine
+    container_name: caddy
+    restart: unless-stopped
+    networks:
+      - core
+    ports:
+      - ${PUBLIC_APP_PORT}:80
+    environment:
+      - BASE_DOMAIN=${BASE_DOMAIN}
+      - ADDRESS=${ADDRESS}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+
+  api:
+    image: ghcr.io/digitranslab/aegiscan:${AEGISCAN__IMAGE_TAG:-0.27.3}
+    container_name: api
+    restart: unless-stopped
+    networks:
+      - core
+      - core-db
+    environment:
+      # App
+      LOG_LEVEL: ${LOG_LEVEL}
+      AEGISCAN__API_URL: ${AEGISCAN__API_URL}
+      AEGISCAN__API_ROOT_PATH: ${AEGISCAN__API_ROOT_PATH}
+      AEGISCAN__APP_ENV: production
+      AEGISCAN__DB_ENCRYPTION_KEY: ${AEGISCAN__DB_ENCRYPTION_KEY} # Sensitive
+      AEGISCAN__DB_SSLMODE: ${AEGISCAN__DB_SSLMODE}
+      AEGISCAN__DB_URI: ${AEGISCAN__DB_URI} # Sensitive
+      AEGISCAN__PUBLIC_API_URL: ${AEGISCAN__PUBLIC_API_URL}
+      AEGISCAN__PUBLIC_APP_URL: ${AEGISCAN__PUBLIC_APP_URL}
+      AEGISCAN__SERVICE_KEY: ${AEGISCAN__SERVICE_KEY} # Sensitive
+      AEGISCAN__SIGNING_SECRET: ${AEGISCAN__SIGNING_SECRET} # Sensitive
+      AEGISCAN__ALLOW_ORIGINS: ${AEGISCAN__ALLOW_ORIGINS}
+      AEGISCAN__AUTH_TYPES: ${AEGISCAN__AUTH_TYPES}
+      AEGISCAN__AUTH_ALLOWED_DOMAINS: ${AEGISCAN__AUTH_ALLOWED_DOMAINS}
+      AEGISCAN__AUTH_MIN_PASSWORD_LENGTH: ${AEGISCAN__AUTH_MIN_PASSWORD_LENGTH}
+      AEGISCAN__SETTING_OVERRIDE_SAML_ENABLED: ${AEGISCAN__SETTING_OVERRIDE_SAML_ENABLED}
+      AEGISCAN__EXECUTOR_URL: ${INTERNAL_EXECUTOR_URL}
+      OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}
+      OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}
+      USER_AUTH_SECRET: ${USER_AUTH_SECRET}
+      RUN_MIGRATIONS: "true"
+      # SAML SSO
+      SAML_IDP_METADATA_URL: ${SAML_IDP_METADATA_URL}
+      # Temporal
+      TEMPORAL__CLUSTER_URL: ${TEMPORAL__CLUSTER_URL}
+      TEMPORAL__CLUSTER_QUEUE: ${TEMPORAL__CLUSTER_QUEUE}
+      TEMPORAL__CLUSTER_NAMESPACE: ${TEMPORAL__CLUSTER_NAMESPACE}
+      TEMPORAL__TASK_TIMEOUT: ${TEMPORAL__TASK_TIMEOUT}
+      # Remote registry
+      AEGISCAN__ALLOWED_GIT_DOMAINS: ${AEGISCAN__ALLOWED_GIT_DOMAINS}
+      AEGISCAN__REMOTE_REPOSITORY_PACKAGE_NAME: ${AEGISCAN__REMOTE_REPOSITORY_PACKAGE_NAME}
+      AEGISCAN__REMOTE_REPOSITORY_URL: ${AEGISCAN__REMOTE_REPOSITORY_URL}
+      # AI
+      AEGISCAN__PRELOAD_OSS_MODELS: ${AEGISCAN__PRELOAD_OSS_MODELS}
+      OLLAMA__API_URL: ${OLLAMA__API_URL}
+      # Local registry
+      AEGISCAN__LOCAL_REPOSITORY_PATH: ${AEGISCAN__LOCAL_REPOSITORY_PATH}
+      AEGISCAN__LOCAL_REPOSITORY_ENABLED: ${AEGISCAN__LOCAL_REPOSITORY_ENABLED}
+    volumes:
+      - ${AEGISCAN__LOCAL_REPOSITORY_PATH}:/app/local_registry
+    depends_on:
+      - executor
+
+  worker:
+    image: ghcr.io/digitranslab/aegiscan:${AEGISCAN__IMAGE_TAG:-0.27.3}
+    restart: unless-stopped
+    networks:
+      - core
+      - core-db
+      - temporal
+    environment:
+      LOG_LEVEL: ${LOG_LEVEL}
+      AEGISCAN__API_ROOT_PATH: ${AEGISCAN__API_ROOT_PATH}
+      AEGISCAN__API_URL: ${AEGISCAN__API_URL}
+      AEGISCAN__APP_ENV: production
+      AEGISCAN__DB_ENCRYPTION_KEY: ${AEGISCAN__DB_ENCRYPTION_KEY} # Sensitive
+      AEGISCAN__DB_SSLMODE: ${AEGISCAN__DB_SSLMODE}
+      AEGISCAN__DB_URI: ${AEGISCAN__DB_URI} # Sensitive
+      AEGISCAN__PUBLIC_API_URL: ${AEGISCAN__PUBLIC_API_URL}
+      AEGISCAN__EXECUTOR_URL: ${INTERNAL_EXECUTOR_URL}
+      AEGISCAN__SERVICE_KEY: ${AEGISCAN__SERVICE_KEY} # Sensitive
+      AEGISCAN__SIGNING_SECRET: ${AEGISCAN__SIGNING_SECRET} # Sensitive
+      # Temporal
+      TEMPORAL__CLUSTER_URL: ${TEMPORAL__CLUSTER_URL}
+      TEMPORAL__CLUSTER_QUEUE: ${TEMPORAL__CLUSTER_QUEUE}
+      TEMPORAL__CLUSTER_NAMESPACE: ${TEMPORAL__CLUSTER_NAMESPACE}
+      # Local registry
+      AEGISCAN__LOCAL_REPOSITORY_PATH: ${AEGISCAN__LOCAL_REPOSITORY_PATH}
+      AEGISCAN__LOCAL_REPOSITORY_ENABLED: ${AEGISCAN__LOCAL_REPOSITORY_ENABLED}
+    volumes:
+      - ${AEGISCAN__LOCAL_REPOSITORY_PATH}:/app/local_registry
+    command: ["python", "aegiscan/dsl/worker.py"]
+
+  executor:
+    image: ghcr.io/digitranslab/aegiscan:${AEGISCAN__IMAGE_TAG:-0.27.3}
+    restart: unless-stopped
+    networks:
+      - core-db
+      - temporal
+    # ports:
+    #   - 8265:8265
+    environment:
+      # Common
+      LOG_LEVEL: ${LOG_LEVEL}
+      AEGISCAN__APP_ENV: production
+      AEGISCAN__DB_ENCRYPTION_KEY: ${AEGISCAN__DB_ENCRYPTION_KEY} # Sensitive
+      AEGISCAN__DB_SSLMODE: ${AEGISCAN__DB_SSLMODE}
+      AEGISCAN__DB_URI: ${AEGISCAN__DB_URI} # Sensitive
+      AEGISCAN__SERVICE_KEY: ${AEGISCAN__SERVICE_KEY} # Sensitive
+      # Remote registry
+      AEGISCAN__ALLOWED_GIT_DOMAINS: ${AEGISCAN__ALLOWED_GIT_DOMAINS}
+      AEGISCAN__REMOTE_REPOSITORY_PACKAGE_NAME: ${AEGISCAN__REMOTE_REPOSITORY_PACKAGE_NAME}
+      AEGISCAN__REMOTE_REPOSITORY_URL: ${AEGISCAN__REMOTE_REPOSITORY_URL}
+      # Email
+      AEGISCAN__ALLOWED_EMAIL_ATTRIBUTES: ${AEGISCAN__ALLOWED_EMAIL_ATTRIBUTES}
+      # AI
+      AEGISCAN__PRELOAD_OSS_MODELS: ${AEGISCAN__PRELOAD_OSS_MODELS}
+      OLLAMA__API_URL: ${OLLAMA__API_URL}
+      # Local registry
+      AEGISCAN__LOCAL_REPOSITORY_PATH: ${AEGISCAN__LOCAL_REPOSITORY_PATH}
+      AEGISCAN__LOCAL_REPOSITORY_ENABLED: ${AEGISCAN__LOCAL_REPOSITORY_ENABLED}
+    volumes:
+      - ${AEGISCAN__LOCAL_REPOSITORY_PATH}:/app/local_registry
+    command:
+      [
+        "python",
+        "-m",
+        "uvicorn",
+        "aegiscan.api.executor:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+      ]
+
+  ui:
+    image: ghcr.io/digitranslab/aegiscan-ui:${AEGISCAN__IMAGE_TAG:-0.27.3}
+    container_name: ui
+    restart: unless-stopped
+    networks:
+      - core
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      NEXT_PUBLIC_APP_ENV: production
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_AUTH_TYPES: ${AEGISCAN__AUTH_TYPES}
+      NEXT_SERVER_API_URL: ${NEXT_SERVER_API_URL}
+      NODE_ENV: production
+    depends_on:
+      - api
+
+  postgres_db:
+    image: postgres:16
+    container_name: postgres_db
+    restart: unless-stopped
+    networks:
+      - core-db
+    shm_size: 128mb
+    environment:
+      POSTGRES_USER: ${AEGISCAN__POSTGRES_USER}
+      POSTGRES_PASSWORD: ${AEGISCAN__POSTGRES_PASSWORD}
+    volumes:
+      - core-db:/var/lib/postgresql/data
+
+  temporal_postgres_db:
+    image: postgres:13
+    container_name: temporal_postgres_db
+    restart: unless-stopped
+    networks:
+      - temporal-db
+    environment:
+      POSTGRES_USER: ${TEMPORAL__POSTGRES_USER}
+      POSTGRES_PASSWORD: ${TEMPORAL__POSTGRES_PASSWORD} # Sensitive
+    volumes:
+      - temporal-db:/var/lib/postgresql/data
+
+  temporal:
+    image: temporalio/auto-setup:${TEMPORAL__VERSION}
+    container_name: temporal
+    restart: unless-stopped
+    networks:
+      - core
+      - temporal
+      - temporal-db
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=${TEMPORAL__POSTGRES_USER}
+      - POSTGRES_PWD=${TEMPORAL__POSTGRES_PASSWORD} # Sensitive
+      - POSTGRES_SEEDS=temporal_postgres_db
+      - LOG_LEVEL=warn
+    depends_on:
+      - temporal_postgres_db
+
+  temporal_ui:
+    image: temporalio/ui:${TEMPORAL__UI_VERSION}
+    container_name: temporal_ui
+    restart: unless-stopped
+    networks:
+      - temporal
+    # ports:
+    #   - 8080:8080
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CORS_ORIGINS=http://localhost:8080
+    depends_on:
+      - temporal
+    attach: false
+
+  # ollama:
+  #   image: ollama/ollama:${OLLAMA__VERSION}
+  #   ports:
+  #     - 11434:11434
+  #   networks:
+  #     - core
+  #   volumes:
+  #     - ollama:/root/.ollama
+
+volumes:
+  core-db:
+  temporal-db:
+  # ollama:
+
+networks:
+  core:
+  core-db:
+    internal: true
+  temporal:
+  temporal-db:
+    internal: true

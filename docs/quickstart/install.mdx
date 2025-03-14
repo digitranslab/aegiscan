@@ -1,0 +1,65 @@
+---
+title: Installation
+icon: download
+---
+
+import DeploymentNote from '/snippets/deployment-note.mdx';
+import PublicUrlNote from '/snippets/public-url-note.mdx';
+
+<Info>
+  The following is a quickstart guide.
+  Need more help? Check out Aegiscan's full [self-hosting guide](/self-hosting/overview).
+</Info>
+
+Aegiscan supports three deployment options:
+
+- Docker Compose
+- AWS Fargate via Terraform
+- Kubernetes via Helm (coming soon)
+
+### Docker Compose
+
+<DeploymentNote />
+
+Deploy a local Aegiscan stack using Docker Compose. View step-by-step instructions [here](https://docs.aegiscan.com/self-hosting/deployment-options/docker-compose).
+
+```bash
+# Download Aegiscan
+git clone https://github.com/DigitransLab/aegiscan.git
+
+# Generate .env file
+./env.sh
+
+# Run Aegiscan
+docker compose up -d
+```
+
+<PublicUrlNote />
+
+Check out the generated `.env` file to better understand Aegiscan's configurations.
+You can also view the template `.env.example` file [here](https://github.com/DigitransLab/aegiscan/blob/0.27.3/.env.example).
+
+### AWS Fargate
+
+**For advanced users:** deploy a production-ready Aegiscan stack on AWS Fargate using Terraform. View step-by-step instructions [here](https://docs.aegiscan.com/self-hosting/deployment-options/aws-ecs).
+
+```bash
+# Download Terraform files
+git clone https://github.com/DigitransLab/aegiscan.git
+cd aegiscan/deployments/aws
+
+# Create and add encryption keys to AWS Secrets Manager
+./scripts/create-aws-secrets.sh
+
+# Run Terraform to deploy Aegiscan
+terraform init
+terraform apply
+```
+
+### Kubernetes
+
+Coming soon.
+
+## Next steps
+
+Learn how to [log into Aegiscan](/quickstart/admin) and create your [first workflow](/quickstart/tutorial).

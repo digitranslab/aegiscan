@@ -1,0 +1,3 @@
+domain:
+  type: str
+  description: Domain to lookup.

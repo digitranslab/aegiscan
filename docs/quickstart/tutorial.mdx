@@ -1,0 +1,287 @@
+---
+title: Quickstart
+description: Everything you need to know to get started with Aegiscan.
+icon: rocket
+---
+
+import YamlNote from "/snippets/yaml-note.mdx";
+import JsonpathNote from "/snippets/jsonpath-note.mdx";
+
+## What you'll learn
+
+By the end of this tutorial, you'll learn how to:
+
+- Call REST APIs via the `core.http_request` action
+- Trigger workflows manually via the UI
+- Add secrets to your workflows
+- Define if-conditions in your workflows
+- Define any / all conditions in your workflows
+- Run actions in a loop
+
+## Prerequisites
+
+- Have Aegiscan [installed](/quickstart/install)
+- An API key from [URLScan](https://urlscan.io/user/profile/)
+
+## Your first workflow
+
+<YamlNote />
+
+<AccordionGroup>
+  <Accordion title="Create new workflow" icon="circle-plus">
+    Click the `Create new` button in the top right corner of the workflows page.
+    ![Create workflow](/img/quickstart/tutorial/create-workflow.png)
+  </Accordion>
+  <Accordion title="Rename workflow" icon="pencil">
+    Click on the empty workflow canvas to open the workflow settings panel.
+    You can change the name and description of the workflow here.
+    ![Rename workflow](/img/quickstart/tutorial/rename-workflow.png)
+  </Accordion>
+  <Accordion title="View available actions" icon="square-plus">
+    To add a new node to the workflow, either drag out the actions dropdown menu from the trigger node or right click on the workflow canvas.
+    ![View available actions](/img/quickstart/tutorial/view-available-actions.png)
+  </Accordion>
+  <Accordion title="Add HTTP request action" icon="globe">
+    Search for and select the `core.http_request` action.
+    ![Add HTTP action](/img/quickstart/tutorial/add-http-action.png)
+  </Accordion>
+  <Accordion title="Call an external weather API" icon="cloud-sun">
+    Click on the `core.http_request` node and fill in the inputs.
+    Aegiscan uses YAML to define action inputs.
+    Press the `cmd+s` or `ctrl+s` keys to save your inputs.
+
+    ```yaml
+    url: https://api.open-meteo.com/v1/forecast
+    method: GET
+    params:
+      latitude: 37.773972
+      longitude: -122.431297
+      current: temperature_2m,precipitation_probability
+    ```
+
+    ![Fill in HTTP request inputs](/img/quickstart/tutorial/http-inputs.png)
+  </Accordion>
+  <Accordion title="Save workflow" icon="floppy-disk">
+    Before you can run your workflow, you need to save it.
+    You must explicitly save your workflow for changes to take effect in workflow runs.
+
+    ![Save workflow](/img/quickstart/tutorial/save-workflow.png)
+  </Accordion>
+  <Accordion title="Run workflow via UI" icon="play">
+    Click the `Run` button to execute your workflow.
+
+    You can ignore the sample webhook payload.
+    In a future [tutorial](/tutorials/workflow-triggers), we will learn how to pass custom payloads into workflows manually via UI or webhook.
+
+    ![Run workflow](/img/quickstart/tutorial/run-workflow.png)
+  </Accordion>
+  <Accordion title="View most recent run" icon="person-running">
+    You can view the status of your most recent run in the left side panel.
+    Select actions row by row to view their inputs and outputs.
+
+    <Tabs>
+      <Tab title="Events">
+        ![View events](/img/quickstart/tutorial/view-events.png)
+      </Tab>
+      <Tab title="Action input">
+        ![View action input](/img/quickstart/tutorial/view-action-input.png)
+      </Tab>
+      <Tab title="Action result">
+        ![View action result](/img/quickstart/tutorial/view-action-result.png)
+      </Tab>
+    </Tabs>
+  </Accordion>
+  <Accordion title="View supported action inputs" icon="list">
+    You can view the required and optional inputs for an action under the `Input Schema` section.
+    ![View input schema](/img/quickstart/tutorial/view-input-schema.png)
+  </Accordion>
+</AccordionGroup>
+
+## Actions and integrations
+
+Actions are the building blocks of Aegiscan workflows.
+Aegiscan has two main types of actions:
+
+- `core` actions for core functionality (e.g. HTTP request, AI action, and data transforms).
+- `tools` actions for integrations to 3rd-party services.
+
+Find out more in Aegiscan's [core actions](/integrations/core) and [tools](/integrations/tools) docs.
+
+<JsonpathNote />
+
+<Steps>
+  <Step title="Search for integrations" icon="magnifying-glass">
+    Search for pre-built integrations in the actions dropdown menu.
+    Do this by right clicking on the workflow canvas or dragging it out from an existing node.
+
+    ![View available actions](/img/quickstart/tutorial/view-available-actions.png)
+  </Step>
+  <Step title="Fill in inputs" icon="keyboard">
+    Fill in the required and optional inputs in the `Inputs` section.
+
+    ![Action inputs](/img/quickstart/tutorial/action-inputs.png)
+  </Step>
+  <Step title="View schema and metadata" icon="file-lines">
+    Expand the `Input schema` section to view all supported inputs and required secrets.
+
+    ![Action input schema](/img/quickstart/tutorial/action-input-schema.png)
+  </Step>
+  <Step title="View template" icon="code">
+    Click on the `View template` tab to view the YAML code for **Action Template** integrations.
+    You can also view the integration's **action type**, **origin**, and **documentation URL** at the top of the action's settings panel.
+
+    ![View template](/img/quickstart/tutorial/view-template.png)
+  </Step>
+</Steps>
+
+## If-conditions
+
+<Tip>
+  View all supported binary operators (e.g. `==`, `>`,`in`) in the [functions cheatsheet](/cheatsheets/functions).
+</Tip>
+
+Every action can be turned into a conditional action.
+Under the `If condition / Loops` tab, you can specify a condition that determines whether the action should be executed.
+
+For example, to run the `Get result` action only if the URL submission was successful, go to the `If condition / Loops` tab and specify the following in the `Run if` input:
+
+```php
+${{ ACTIONS.scan_url.result.data.message == "Submission successful" }}
+```
+
+![Run if](/img/quickstart/tutorial/run-if.png)
+
+**Examples**
+
+<Note>
+  Conditional expressions are one of the most powerful features in Aegiscan.
+  Combine binary operators and in-line functions to express complex conditions with ease.
+</Note>
+
+Here are examples of commonly used conditional expressions:
+
+<CodeGroup>
+  ```php Basic Comparison
+  # Equal to
+  ${{ ACTIONS.user_role.result == "admin" }}
+
+  # Not equal to
+  ${{ ACTIONS.environment.result != "production" }}
+
+  # Greater than
+  ${{ ACTIONS.failed_attempts.result > 5 }}
+
+  # Less than
+  ${{ ACTIONS.response_time.result < 1000 }}
+
+  # Greater than or equal to
+  ${{ ACTIONS.cpu_usage.result >= 90 }}
+
+  # Less than or equal to
+  ${{ ACTIONS.memory_usage.result <= 80 }}
+  ```
+
+  ```php List Operations
+  # Check if value is in list
+  ${{ ACTIONS.ip_address.result in ['192.168.1.1', '10.0.0.1'] }}
+
+  # Check if value is not in list
+  ${{ ACTIONS.status.result not in ['error', 'failed', 'timeout'] }}
+
+  # Check if value is in dynamic list
+  ${{ ACTIONS.alert.severity in ACTIONS.get_critical_levels.result }}
+  ```
+
+  ```php Boolean Checks
+  # Check if condition is True
+  ${{ bool(ACTIONS.is_enabled.result) is True }}
+
+  # Check if condition is False
+  ${{ bool(ACTIONS.is_locked.result) is False }}
+  ```
+
+  ```php Identity Checks
+  # Check if value is None/null
+  ${{ ACTIONS.optional_field.result is None }}
+
+  # Check if value is not None/null
+  ${{ ACTIONS.required_field.result is not None }}
+
+  # Check if service status is running
+  ${{ ACTIONS.service_status.result is 'running' }}
+  ```
+</CodeGroup>
+
+You can also combine multiple conditions using the `&&` and `||` operators:
+
+```php Combined Conditions
+# Check if user is admin and CPU usage is high
+${{ ACTIONS.user_role.result == "admin" && ACTIONS.cpu_usage.result >= 90 }}
+
+# Check if either memory or CPU usage is critical
+${{ ACTIONS.memory_usage.result >= 95 || ACTIONS.cpu_usage.result >= 95 }}
+```
+
+## Any / All Conditions
+
+Consider the case where you have multiple upstream actions that connect to one downstream joining node.
+You can control whether the joining node should run if `all` or `any` of the upstream actions succeed or fail.
+
+Configure this by going to the `If condition / Loops` tab of the joining node and setting the `join_strategy` option to `all` or `any`.
+
+![Join strategy](/img/quickstart/tutorial/join-strategy.png)
+
+## Loops
+
+Every action can be turned into a looped action.
+Under the `If condition / Loops` tab, you can specify loop expressions to iterate over a list of items and run the action for each item.
+
+<Tip>
+  You can loop over any list of items in your workflow context.
+  For example, it can be a list of file hashes in a previous action `ACTIONS.some_intel_feed.result.data.malware_samples` or a list of items received via webhook in `TRIGGER`.
+</Tip>
+
+**Example**
+
+<Steps>
+  <Step title="Define the loop">
+    Define a loop expression using the `${{ for var.some_variable_name in some_list }}` syntax.
+    The variable name can be anything you want, but we recommend using a name that makes sense for the items in the list.
+
+    In this example, we iterate through a list of numbers send via webhook in `TRIGGER`.
+
+    ```php
+    ${{ for var.number in TRIGGER.numbers }}
+    ```
+
+    ![Define loop expression](/img/quickstart/tutorial/loop-expression.png)
+  </Step>
+  <Step title="Use the loop variable">
+    Go back to the action's `Inputs` tab.
+    You can now use the loop variable in the action's inputs using the `${{ var.some_variable_name }}` syntax.
+    During the workflow run, each `var.some_variable_name` in the loop expression is replaced with the current item in the list.
+
+    In this example, we use the loop variable in `core.transform.reshape` action to iterate through a list of numbers and add one to each number.
+
+    ```php
+    value: ${{ var.number + 1 }}
+    ```
+
+    ![Add one to variable](/img/quickstart/tutorial/add-one-to-variable.png)
+  </Step>
+  <Step title="Run workflow">
+    Run the workflow via UI with the payload `{"numbers": [1, 2, 3]}` to see the loop in action.
+
+    The `core.transform.reshape` action will be executed three times with `var.number` being `1`, `2`, and `3` respectively and the output will be `[2, 3, 4]`.
+
+    ![Run workflow](/img/quickstart/tutorial/run-loop-workflow.png)
+  </Step>
+</Steps>
+
+## What next?
+
+- Learn about Aegiscan's [core actions](/integrations/core).
+- Learn how to trigger workflows via [webhooks and schedules](/tutorials/workflow-triggers).
+- Learn how to reference data from actions and webhooks using [expressions](/quickstart/expressions).
+- Learn how to build and sync your own [custom integrations](/tutorials/custom-integrations]) from a private Git repository.
+- Join our [Discord community](https://discord.gg/n3GF4qxFU8) for ideas and support.
