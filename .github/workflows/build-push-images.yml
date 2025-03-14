@@ -30,7 +30,7 @@ jobs:
           - runner: ubuntu-latest
             platform: linux/amd64
             platform_tag: linux-amd64
-          - runner: ubuntu-arm64-latest
+          - runner: ubuntu-latest
             platform: linux/arm64
             platform_tag: linux-arm64
     steps:
@@ -136,7 +136,7 @@ jobs:
           - runner: ubuntu-latest
             platform: linux/amd64
             platform_tag: linux-amd64
-          - runner: ubuntu-arm64-latest
+          - runner: ubuntu-latest
             platform: linux/arm64
             platform_tag: linux-arm64
     steps:
