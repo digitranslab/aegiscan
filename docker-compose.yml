@@ -14,7 +14,7 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile
 
   api:
-    image: ghcr.io/digitranslab/aegiscan:${AEGISCAN__IMAGE_TAG:-0.27.3}
+    image: digitranslab/aegiscan:main
     container_name: api
     restart: unless-stopped
     networks:
@@ -66,7 +66,7 @@ services:
       - executor
 
   worker:
-    image: ghcr.io/digitranslab/aegiscan:${AEGISCAN__IMAGE_TAG:-0.27.3}
+    image: digitranslab/aegiscan:main
     restart: unless-stopped
     networks:
       - core
@@ -96,7 +96,7 @@ services:
     command: ["python", "aegiscan/dsl/worker.py"]
 
   executor:
-    image: ghcr.io/digitranslab/aegiscan:${AEGISCAN__IMAGE_TAG:-0.27.3}
+    image: digitranslab/aegiscan:main
     restart: unless-stopped
     networks:
       - core-db
@@ -138,7 +138,7 @@ services:
       ]
 
   ui:
-    image: ghcr.io/digitranslab/aegiscan-ui:${AEGISCAN__IMAGE_TAG:-0.27.3}
+    image: digitranslab/aegiscan-ui:main
     container_name: ui
     restart: unless-stopped
     networks:
